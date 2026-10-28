@@ -1,0 +1,31 @@
+---
+// src/components/layout/SkipLink.astro
+// Accessibility skip link for keyboard navigation
+
+export interface Props {
+  targetId?: string;
+}
+
+const { targetId = 'main-content' } = Astro.props;
+---
+
+<a href={`#${targetId}`} class="skip-link">Skip to main content</a>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-brand);
+    color: var(--color-on-brand);
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0 0 var(--radius-md) 0;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+</style>

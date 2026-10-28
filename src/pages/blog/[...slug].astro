@@ -1,0 +1,32 @@
+---
+// src/pages/blog/[...slug].astro
+// Dynamic blog post page
+import { getCollection, type CollectionEntry } from 'astro:content';
+import PostLayout from '@/layouts/PostLayout.astro';
+import { articleSchema, getSiteUrl } from '@/lib/seo';
+import JsonLd from '@/components/seo/JsonLd.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props as { post: CollectionEntry<'posts'> };
+const { Content } = await post.render();
+
+const title = post.data.title;
+const description = post.data.description || '';
+const canonical = getSiteUrl(`/blog/${post.slug}/`);
+const pubDate = post.data.pubDate.toISOString();
+const image = post.data.ogImage;
+
+const jsonLd = articleSchema(title, description, canonical, pubDate, image);
+---
+
+<PostLayout title={title} description={description} date={pubDate} image={image}>
+  <Content />
+  <JsonLd data={jsonLd} />
+</PostLayout>

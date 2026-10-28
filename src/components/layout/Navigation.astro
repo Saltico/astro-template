@@ -1,0 +1,207 @@
+---
+// src/components/layout/Navigation.astro
+// Main navigation with mobile drawer support
+
+import type { NavItem } from '@/types/navigation';
+import Icon from '@/components/ui/Icon.astro';
+
+export interface Props {
+  items: NavItem[];
+  ariaLabel?: string;
+  variant?: 'default' | 'dark';
+}
+
+const { items, ariaLabel = 'Main navigation', variant = 'default' } = Astro.props;
+const currentPath = Astro.url.pathname;
+
+const isVariantDark = variant === 'dark';
+const variantClass = isVariantDark ? 'navigation--dark' : '';
+---
+
+<button
+  type="button"
+  class="navigation__toggle"
+  aria-label="Toggle menu"
+  data-nav-toggle
+>
+  <Icon name="menu" size={24} />
+  <Icon name="close" size={24} class="navigation__toggle-icon--close" />
+</button>
+
+<nav aria-label={ariaLabel} class:list={['navigation', variantClass]} data-navigation>
+  <ul class="navigation__list">
+    {items.map((item) => {
+      const isActive = currentPath === item.url || currentPath.startsWith(item.url + '/');
+      const hasChildren = item.children && item.children.length > 0;
+      return (
+        <li class:list={['navigation__item', isActive && 'navigation__item--active', hasChildren && 'navigation__item--has-children']}>
+          <a
+            href={item.url}
+            class="navigation__link"
+            aria-current={isActive ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+          {hasChildren && (
+            <ul class="navigation__submenu">
+              {item.children!.map((child) => (
+                <li class="navigation__subitem">
+                  <a href={child.url} class="navigation__sublink">
+                    {child.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      );
+    })}
+  </ul>
+  <slot name="mobile-actions" />
+</nav>
+
+<style>
+  .navigation {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-6);
+  }
+
+  .navigation__toggle {
+    display: none;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+  }
+
+  @media (max-width: 767px) {
+    .navigation__toggle {
+      display: block;
+    }
+
+    .navigation__toggle-icon--close {
+      display: none;
+    }
+
+    [data-nav-open] .navigation__toggle-icon {
+      display: none;
+    }
+
+    [data-nav-open] .navigation__toggle-icon--close {
+      display: block;
+    }
+  }
+
+  .navigation__list {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (max-width: 767px) {
+    .navigation__list {
+      display: none;
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      flex-direction: column;
+      background-color: var(--color-surface);
+      padding: var(--spacing-8);
+      gap: var(--spacing-4);
+      overflow-y: auto;
+    }
+
+    [data-nav-open] .navigation__list {
+      display: flex;
+    }
+  }
+
+  .navigation__link {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s var(--ease-out);
+  }
+
+  .navigation__link:hover,
+  .navigation__link:focus {
+    color: var(--color-brand);
+  }
+
+  .navigation__item--active > .navigation__link {
+    color: var(--color-brand);
+  }
+
+  .navigation__item--has-children {
+    position: relative;
+  }
+
+  .navigation__submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-3);
+    min-width: 200px;
+    list-style: none;
+    margin: 0;
+    box-shadow: var(--shadow-md);
+  }
+
+  .navigation__item--has-children:hover .navigation__submenu,
+  .navigation__item--has-children:focus-within .navigation__submenu {
+    display: flex;
+  }
+
+  .navigation__sublink {
+    color: var(--color-ink-700);
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s var(--ease-out);
+  }
+
+  .navigation__sublink:hover {
+    background-color: var(--color-surface-alt);
+    color: var(--color-brand);
+  }
+
+  /* Dark variant */
+  .navigation--dark {
+    color: var(--color-on-dark);
+  }
+
+  .navigation--dark .navigation__link:hover {
+    color: var(--color-on-dark);
+  }
+</style>
+
+<script>
+  // Mobile nav toggle
+  (function () {
+    const toggle = document.querySelector('[data-nav-toggle]');
+    const nav = document.querySelector('[data-navigation]');
+    if (!toggle || !nav) return;
+
+    toggle.addEventListener('click', () => {
+      const isOpen = document.body.hasAttribute('data-nav-open');
+      if (isOpen) {
+        document.body.removeAttribute('data-nav-open');
+      } else {
+        document.body.setAttribute('data-nav-open', '');
+      }
+    });
+  })();
+</script>

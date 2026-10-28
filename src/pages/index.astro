@@ -1,0 +1,124 @@
+---
+// src/pages/index.astro
+// Homepage
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import SectionLayout from '@/components/ui/SectionLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import { siteBrand } from '@/data/site';
+
+const title = `${siteBrand.name} - ${siteBrand.tagline}`;
+const description = siteBrand.description;
+---
+
+<BaseLayout title={title} description={description}>
+  <SectionLayout background="dark" spacing="lg">
+    <Container size="lg">
+      <div class="hero">
+        <h1 class="hero__title">{siteBrand.name}</h1>
+        <p class="hero__subtitle">{siteBrand.tagline}</p>
+        <p class="hero__description">{siteBrand.description}</p>
+        <div class="hero__actions">
+          <Button variant="primary" href="/blog">Read the Blog</Button>
+          <Button variant="outline" href="/about">Learn More</Button>
+        </div>
+      </div>
+    </Container>
+  </SectionLayout>
+
+  <SectionLayout background="default" spacing="md">
+    <Container size="lg">
+      <h2 class="text-center">Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>SEO Optimized</h3>
+          <p>Auto-generated canonical URLs, Open Graph tags, JSON-LD schemas, and sitemap.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Analytics Ready</h3>
+          <p>Google Tag Manager + GA4 with Consent Mode v2 and event tracking.</p>
+        </div>
+        <div class="feature-card">
+          <h3>CMS Integration</h3>
+          <p>Edit content locally with Keystatic at /keystatic in dev mode.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Tailwind v4</h3>
+          <p>CSS-first design tokens with zero configuration needed.</p>
+        </div>
+      </div>
+    </Container>
+  </SectionLayout>
+</BaseLayout>
+
+<style>
+  .hero {
+    text-align: center;
+    max-width: 800px;
+    margin-inline: auto;
+  }
+
+  .hero__title {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: var(--spacing-4);
+    color: var(--color-on-dark);
+  }
+
+  .hero__subtitle {
+    font-size: var(--text-lead);
+    color: var(--color-on-dark-muted);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .hero__description {
+    font-size: var(--text-body);
+    color: var(--color-on-dark-muted);
+    margin-bottom: var(--spacing-8);
+    line-height: 1.7;
+  }
+
+  .hero__actions {
+    display: flex;
+    gap: var(--spacing-4);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .text-center {
+    text-align: center;
+    margin-bottom: var(--spacing-8);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .feature-card {
+    padding: var(--spacing-6);
+    background-color: var(--color-surface-alt);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-line);
+  }
+
+  .feature-card h3 {
+    font-size: var(--text-h4);
+    margin-bottom: var(--spacing-3);
+    color: var(--color-brand);
+  }
+
+  .feature-card p {
+    color: var(--color-ink-700);
+    line-height: 1.6;
+  }
+
+  :root[data-theme='dark'] .feature-card {
+    background-color: var(--color-graphite-2);
+    border-color: var(--color-line-dark);
+  }
+
+  :root[data-theme='dark'] .feature-card p {
+    color: var(--color-on-dark-muted);
+  }
+</style>
