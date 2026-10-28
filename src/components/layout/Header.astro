@@ -102,6 +102,13 @@ const headerClassList = ['header', variant === 'brand' && 'header--brand'];
     }
   }
 
+  /* Hide ThemeToggle from CTA on mobile — it lives inside the mobile drawer */
+  @media (max-width: 1023px) {
+    .header__cta :global([data-theme-toggle]) {
+      display: none;
+    }
+  }
+
   .header__cta {
     flex-shrink: 0;
     display: inline-flex;

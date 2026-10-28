@@ -1,0 +1,126 @@
+---
+// src/components/ui/Textarea.astro
+// Reusable textarea component from the design system.
+// Supports label, placeholder, required, disabled, error states, rows, and maxlength.
+
+export interface Props {
+  name: string;
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  rows?: number;
+  maxlength?: number;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  id?: string;
+  class?: string;
+}
+
+const {
+  name,
+  label,
+  placeholder,
+  value,
+  rows = 4,
+  maxlength,
+  required = false,
+  disabled = false,
+  error,
+  id,
+  class: className,
+} = Astro.props;
+
+const textareaId = id ?? `textarea-${name}`;
+const errorId = error ? `${textareaId}-error` : undefined;
+---
+
+<div class:list={['textarea-wrapper', error && 'textarea-wrapper--error', className]}>
+  {label && (
+    <label for={textareaId} class="textarea-wrapper__label">
+      {label}
+      {required && <span class="textarea-wrapper__required" aria-hidden="true">*</span>}
+    </label>
+  )}
+  <textarea
+    id={textareaId}
+    name={name}
+    placeholder={placeholder}
+    {rows}
+    maxlength={maxlength}
+    required={required}
+    disabled={disabled}
+    class="textarea-wrapper__textarea"
+    aria-describedby={errorId}
+    aria-invalid={error ? 'true' : undefined}
+  >{value}</textarea>
+  {error && <span class="textarea-wrapper__error" id={errorId} role="alert">{error}</span>}
+</div>
+
+<style>
+  .textarea-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .textarea-wrapper__label {
+    font-family: var(--font-heading);
+    font-size: var(--text-small);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-500);
+  }
+
+  .textarea-wrapper__required {
+    color: var(--color-danger);
+    margin-left: 0.15em;
+  }
+
+  .textarea-wrapper__textarea {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 0.625rem 0.75rem;
+    resize: vertical;
+    transition:
+      border-color 0.2s var(--ease-out),
+      box-shadow 0.2s var(--ease-out);
+  }
+
+  .textarea-wrapper__textarea::placeholder {
+    color: var(--color-ink-500);
+  }
+
+  .textarea-wrapper__textarea:focus {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-color: var(--color-brand);
+  }
+
+  .textarea-wrapper__textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--color-surface-alt);
+  }
+
+  .textarea-wrapper--error .textarea-wrapper__textarea {
+    border-color: var(--color-danger);
+    background-color: color-mix(in srgb, var(--color-danger) 4%, transparent);
+  }
+
+  .textarea-wrapper--error .textarea-wrapper__textarea:focus {
+    outline-color: var(--color-danger);
+  }
+
+  .textarea-wrapper__error {
+    font-size: var(--text-small);
+    color: var(--color-danger);
+    font-weight: 600;
+  }
+</style>

@@ -31,7 +31,7 @@ const description = 'Latest articles and updates from our team.';
         <div class="post-grid">
           {posts.map((post) => (
             <article class="post-card">
-              <a href={`/blog/${post.slug}/`}>
+              <a href={`/blog/${post.slug}`}>
                 <time class="post-card__date" datetime={post.data.pubDate.toISOString()}>
                   {post.data.pubDate.toLocaleDateString('en-US', {
                     year: 'numeric',

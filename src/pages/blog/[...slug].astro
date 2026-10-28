@@ -19,7 +19,7 @@ const { Content } = await post.render();
 
 const title = post.data.title;
 const description = post.data.description || '';
-const canonical = getSiteUrl(`/blog/${post.slug}/`);
+const canonical = getSiteUrl(`/blog/${post.slug}`);
 const pubDate = post.data.pubDate.toISOString();
 const image = post.data.ogImage;
 

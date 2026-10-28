@@ -1,0 +1,125 @@
+---
+// src/components/ui/Input.astro
+// Reusable input component from the design system.
+// Supports label, placeholder, required, disabled, error states, and all text types.
+
+export interface Props {
+  type?: 'text' | 'email' | 'tel' | 'number' | 'password' | 'search' | 'url';
+  name: string;
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  autocomplete?: string;
+  id?: string;
+  class?: string;
+}
+
+const {
+  type = 'text',
+  name,
+  label,
+  placeholder,
+  value,
+  required = false,
+  disabled = false,
+  error,
+  autocomplete,
+  id,
+  class: className,
+} = Astro.props;
+
+const inputId = id ?? `input-${name}`;
+const errorId = error ? `${inputId}-error` : undefined;
+---
+
+<div class:list={['input-wrapper', error && 'input-wrapper--error', className]}>
+  {label && (
+    <label for={inputId} class="input-wrapper__label">
+      {label}
+      {required && <span class="input-wrapper__required" aria-hidden="true">*</span>}
+    </label>
+  )}
+  <input
+    type={type}
+    id={inputId}
+    name={name}
+    placeholder={placeholder}
+    value={value}
+    required={required}
+    disabled={disabled}
+    autocomplete={autocomplete}
+    class="input-wrapper__input"
+    aria-describedby={errorId}
+    aria-invalid={error ? 'true' : undefined}
+  />
+  {error && <span class="input-wrapper__error" id={errorId} role="alert">{error}</span>}
+</div>
+
+<style>
+  .input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .input-wrapper__label {
+    font-family: var(--font-heading);
+    font-size: var(--text-small);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-500);
+  }
+
+  .input-wrapper__required {
+    color: var(--color-danger);
+    margin-left: 0.15em;
+  }
+
+  .input-wrapper__input {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 0.625rem 0.75rem;
+    transition:
+      border-color 0.2s var(--ease-out),
+      box-shadow 0.2s var(--ease-out);
+  }
+
+  .input-wrapper__input::placeholder {
+    color: var(--color-ink-500);
+  }
+
+  .input-wrapper__input:focus {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-color: var(--color-brand);
+  }
+
+  .input-wrapper__input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--color-surface-alt);
+  }
+
+  .input-wrapper--error .input-wrapper__input {
+    border-color: var(--color-danger);
+    background-color: color-mix(in srgb, var(--color-danger) 4%, transparent);
+  }
+
+  .input-wrapper--error .input-wrapper__input:focus {
+    outline-color: var(--color-danger);
+  }
+
+  .input-wrapper__error {
+    font-size: var(--text-small);
+    color: var(--color-danger);
+    font-weight: 600;
+  }
+</style>

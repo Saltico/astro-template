@@ -22,7 +22,7 @@ const { Content } = await page.render();
 const title = page.data.title;
 const description = page.data.description || '';
 const noindex = page.data.noindex;
-const canonical = getSiteUrl(`/${page.slug}/`);
+const canonical = getSiteUrl(`/${page.slug}`);
 ---
 
 <BaseLayout title={title} description={description} canonical={canonical} noindex={noindex}>

@@ -1,0 +1,297 @@
+---
+// src/pages/contact.astro
+// Contact page with a basic form
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import SectionLayout from '@/components/ui/SectionLayout.astro';
+import PageHero from '@/components/ui/PageHero.astro';
+import Input from '@/components/ui/Input.astro';
+import Textarea from '@/components/ui/Textarea.astro';
+import Button from '@/components/ui/Button.astro';
+import { siteContact, siteBrand } from '@/data/site';
+
+const title = 'Contact';
+const description = `Get in touch with ${siteBrand.name}. We'd love to hear from you.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <PageHero title={title} description={description} />
+
+  <SectionLayout background="default" spacing="lg">
+    <Container size="lg">
+      <div class="contact-grid">
+        <!-- Contact info sidebar -->
+        <aside class="contact-info">
+          <h2 class="contact-info__title">Get in Touch</h2>
+          <p class="contact-info__text">
+            We'd love to hear from you. Fill out the form and we'll get back to you as soon as possible.
+          </p>
+
+          <div class="contact-info__details">
+            {siteContact.email && (
+              <div class="contact-info__item">
+                <span class="contact-info__label">Email</span>
+                <a href={`mailto:${siteContact.email}`} class="contact-info__value">
+                  {siteContact.email}
+                </a>
+              </div>
+            )}
+
+            {siteContact.phone && (
+              <div class="contact-info__item">
+                <span class="contact-info__label">Phone</span>
+                <a href={`tel:${siteContact.phone.replace(/\s/g, '')}`} class="contact-info__value">
+                  {siteContact.phone}
+                </a>
+              </div>
+            )}
+
+            {siteContact.address && (
+              <div class="contact-info__item">
+                <span class="contact-info__label">Address</span>
+                <span class="contact-info__value">{siteContact.address}</span>
+              </div>
+            )}
+
+            {siteContact.schedule && (
+              <div class="contact-info__item">
+                <span class="contact-info__label">Hours</span>
+                <span class="contact-info__value">{siteContact.schedule}</span>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <!-- Contact form -->
+        <form class="contact-form" data-contact-form>
+          <div class="contact-form__row">
+            <Input
+              name="firstName"
+              label="First Name"
+              type="text"
+              placeholder="John"
+              required
+              autocomplete="given-name"
+            />
+            <Input
+              name="lastName"
+              label="Last Name"
+              type="text"
+              placeholder="Doe"
+              required
+              autocomplete="family-name"
+            />
+          </div>
+
+          <div class="contact-form__row">
+            <Input
+              name="email"
+              label="Email"
+              type="email"
+              placeholder="john@example.com"
+              required
+              autocomplete="email"
+            />
+            <Input
+              name="phone"
+              label="Phone"
+              type="tel"
+              placeholder="+1 (555) 000-0000"
+              autocomplete="tel"
+            />
+          </div>
+
+          <Input
+            name="subject"
+            label="Subject"
+            type="text"
+            placeholder="How can we help?"
+            required
+          />
+
+          <Textarea
+            name="message"
+            label="Message"
+            placeholder="Tell us more about your inquiry..."
+            rows={6}
+            required
+          />
+
+          <div class="contact-form__actions">
+            <Button type="submit" variant="primary" size="lg">
+              Send Message
+            </Button>
+          </div>
+
+          <!-- Success message (hidden by default) -->
+          <div class="contact-form__success" data-contact-success hidden>
+            <div class="contact-form__success-icon">✓</div>
+            <h3 class="contact-form__success-title">Message Sent!</h3>
+            <p class="contact-form__success-text">
+              Thank you for reaching out. We'll get back to you within 24 hours.
+            </p>
+          </div>
+        </form>
+      </div>
+    </Container>
+  </SectionLayout>
+</BaseLayout>
+
+<style>
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-12);
+  }
+
+  @media (min-width: 768px) {
+    .contact-grid {
+      grid-template-columns: 1fr 2fr;
+      gap: var(--spacing-16);
+      align-items: start;
+    }
+  }
+
+  /* ── Contact info sidebar ── */
+  .contact-info__title {
+    font-size: var(--text-h3);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .contact-info__text {
+    color: var(--color-ink-700);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-8);
+  }
+
+  .contact-info__details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+  }
+
+  .contact-info__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .contact-info__label {
+    font-family: var(--font-heading);
+    font-size: var(--text-small);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-500);
+  }
+
+  .contact-info__value {
+    font-size: var(--text-body);
+    color: var(--color-ink);
+    line-height: 1.6;
+  }
+
+  a.contact-info__value {
+    color: var(--color-brand);
+    text-decoration: none;
+  }
+
+  a.contact-info__value:hover {
+    text-decoration: underline;
+  }
+
+  /* ── Contact form ── */
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+  }
+
+  .contact-form__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6);
+  }
+
+  @media (min-width: 480px) {
+    .contact-form__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .contact-form__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* ── Success message ── */
+  .contact-form__success {
+    text-align: center;
+    padding: var(--spacing-8);
+    background-color: var(--color-surface-alt);
+    border-radius: var(--radius-lg);
+    margin-top: var(--spacing-4);
+  }
+
+  .contact-form__success[hidden] {
+    display: none;
+  }
+
+  .contact-form__success-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background-color: var(--color-success);
+    color: #fff;
+    border-radius: var(--radius-pill);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-4);
+  }
+
+  .contact-form__success-title {
+    font-size: var(--text-h4);
+    margin-bottom: var(--spacing-2);
+    color: var(--color-ink);
+  }
+
+  .contact-form__success-text {
+    color: var(--color-ink-700);
+    line-height: 1.6;
+  }
+
+  /* ── Dark mode adjustments ── */
+  :root[data-theme='dark'] .contact-info__text,
+  :root[data-theme='dark'] .contact-info__value,
+  :root[data-theme='dark'] .contact-form__success-text {
+    color: var(--color-ink-700);
+  }
+</style>
+
+<script>
+  // Client-side form handler (placeholder — wire up to your backend or service like Formspree)
+  (function () {
+    const form = document.querySelector('[data-contact-form]');
+    const success = document.querySelector('[data-contact-success]');
+    if (!form || !success) return;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // TODO: Replace with actual submission logic
+      // Example: fetch('/api/contact', { method: 'POST', body: new FormData(form) })
+      //   .then(res => res.json())
+      //   .then(() => { ... })
+
+      // For now, show success message
+      (form as HTMLFormElement).style.display = 'none';
+      success.hidden = false;
+
+      // Optional: scroll to success message
+      success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  })();
+</script>
