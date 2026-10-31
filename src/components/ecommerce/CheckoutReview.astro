@@ -1,0 +1,177 @@
+---
+// src/components/ecommerce/CheckoutReview.astro
+// Step 4: Order review and submission
+
+import CartSummary from '@/components/ecommerce/CartSummary.astro';
+import Button from '@/components/ui/Button.astro';
+import { getShippingData, getPaymentData } from '@/lib/checkout';
+
+const shipping = getShippingData();
+const payment = getPaymentData();
+---
+
+<div class="checkout-review" data-checkout-review>
+  <h2 class="checkout-review__title">Review Your Order</h2>
+
+  <div class="checkout-review__grid">
+    <div class="checkout-review__column">
+      <h3 class="checkout-review__subtitle">Shipping Information</h3>
+      <div class="checkout-review__info">
+        {shipping && (
+          <>
+            <p><strong>{shipping.firstName} {shipping.lastName}</strong></p>
+            <p>{shipping.email}</p>
+            <p>{shipping.phone}</p>
+            <p>{shipping.address}</p>
+            <p>{shipping.city}, {shipping.state} {shipping.zipCode}</p>
+            <p>{shipping.country}</p>
+          </>
+        )}
+      </div>
+    </div>
+
+    <div class="checkout-review__column">
+      <h3 class="checkout-review__subtitle">Payment Method</h3>
+      <div class="checkout-review__info">
+        {payment && (
+          <>
+            <p><strong>{payment.cardName}</strong></p>
+            <p>Card ending in {payment.cardNumber?.slice(-4) || '****'}</p>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <div class="checkout-review__cart">
+    <h3 class="checkout-review__subtitle">Order Summary</h3>
+    <CartSummary variant="compact" showActions={false} />
+  </div>
+
+  <div class="checkout-review__actions">
+    <Button type="button" variant="outline" data-checkout-prev>
+      Back
+    </Button>
+    <Button type="submit" variant="primary" data-checkout-submit>
+      Place Order
+    </Button>
+  </div>
+</div>
+
+<style>
+  .checkout-review {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+  }
+
+  .checkout-review__title {
+    font-size: var(--text-h3);
+    margin: 0;
+  }
+
+  .checkout-review__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6);
+  }
+
+  @media (min-width: 640px) {
+    .checkout-review__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .checkout-review__subtitle {
+    font-size: var(--text-h5);
+    margin: 0 0 var(--spacing-3) 0;
+    color: var(--color-ink-700);
+  }
+
+  .checkout-review__info {
+    padding: var(--spacing-4);
+    background-color: var(--color-surface-alt);
+    border-radius: var(--radius-md);
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+
+  .checkout-review__info p {
+    margin: 0;
+  }
+
+  .checkout-review__cart {
+    padding: var(--spacing-6);
+    background-color: var(--color-surface-alt);
+    border-radius: var(--radius-lg);
+  }
+
+  .checkout-review__actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--color-line);
+  }
+
+  :root[data-theme='dark'] .checkout-review__info,
+  :root[data-theme='dark'] .checkout-review__cart {
+    background-color: var(--color-surface-alt);
+  }
+</style>
+
+<script>
+  import { getCart, clearCart } from '@/lib/cart';
+  import { getShippingData, getPaymentData, clearCheckoutData } from '@/lib/checkout';
+
+  // Submit order
+  document.querySelector('[data-checkout-submit]')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    const cart = getCart();
+    const shipping = getShippingData();
+    const payment = getPaymentData();
+
+    if (!cart || cart.items.length === 0) {
+      alert('Your cart is empty');
+      return;
+    }
+
+    if (!shipping || !payment) {
+      alert('Please complete all checkout steps');
+      return;
+    }
+
+    const orderData = {
+      cart,
+      shipping,
+      payment: {
+        // Don't send full card number to server
+        last4: payment.cardNumber?.slice(-4),
+        name: payment.cardName,
+      },
+    };
+
+    try {
+      // TODO: Replace with your actual order submission endpoint
+      // const response = await fetch('/api/order', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(orderData),
+      // });
+
+      // For demo, just show success message
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Clear cart and checkout data
+      clearCart();
+      clearCheckoutData();
+
+      // Redirect to success page
+      window.location.href = '/order-success';
+    } catch (error) {
+      console.error('Order submission failed:', error);
+      alert('Failed to place order. Please try again.');
+    }
+  });
+</script>

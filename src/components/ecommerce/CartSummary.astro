@@ -1,0 +1,251 @@
+---
+// src/components/ecommerce/CartSummary.astro
+// Cart summary with items, totals, and actions
+
+export interface Props {
+  variant?: 'full' | 'compact';
+  showActions?: boolean;
+}
+
+const { variant = 'full', showActions = true } = Astro.props;
+---
+
+<div class="cart-summary" data-cart-summary>
+  <div class="cart-summary__items" data-cart-items>
+    <!-- Populated by client-side script -->
+    <p class="cart-summary__empty">Your cart is empty</p>
+  </div>
+
+  {showActions && (
+    <div class="cart-summary__footer">
+      <div class="cart-summary__total">
+        <span>Total:</span>
+        <span data-cart-total>$0.00</span>
+      </div>
+
+      <div class="cart-summary__actions">
+        <button type="button" class="cart-summary__clear" data-cart-clear>
+          Clear Cart
+        </button>
+        <a href="/checkout" class="cart-summary__checkout">
+          Checkout
+        </a>
+      </div>
+    </div>
+  )}
+</div>
+
+<style>
+  .cart-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  .cart-summary__items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .cart-summary__empty {
+    text-align: center;
+    padding: var(--spacing-8);
+    color: var(--color-ink-500);
+    font-style: italic;
+  }
+
+  .cart-summary__item {
+    display: flex;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+    background-color: var(--color-surface-alt);
+    border-radius: var(--radius-md);
+  }
+
+  .cart-summary__item-image {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background-color: var(--color-line);
+  }
+
+  .cart-summary__item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cart-summary__item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .cart-summary__item-name {
+    font-weight: 600;
+    font-size: var(--text-body);
+    color: var(--color-ink);
+  }
+
+  .cart-summary__item-quantity {
+    font-size: var(--text-small);
+    color: var(--color-ink-700);
+  }
+
+  .cart-summary__item-price {
+    font-weight: 700;
+    color: var(--color-brand);
+  }
+
+  .cart-summary__item-remove {
+    padding: 0.25rem 0.5rem;
+    background: none;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    color: var(--color-ink-700);
+    cursor: pointer;
+    font-size: var(--text-small);
+    transition: all 0.2s var(--ease-out);
+  }
+
+  .cart-summary__item-remove:hover {
+    background-color: var(--color-danger);
+    border-color: var(--color-danger);
+    color: #fff;
+  }
+
+  .cart-summary__footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .cart-summary__total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--text-h4);
+    font-weight: 700;
+  }
+
+  .cart-summary__total [data-cart-total] {
+    color: var(--color-brand);
+  }
+
+  .cart-summary__actions {
+    display: flex;
+    gap: var(--spacing-3);
+  }
+
+  .cart-summary__clear {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    color: var(--color-ink-700);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s var(--ease-out);
+  }
+
+  .cart-summary__clear:hover {
+    background-color: var(--color-surface-alt);
+    border-color: var(--color-ink-500);
+  }
+
+  .cart-summary__checkout {
+    flex: 2;
+    padding: 0.75rem 1rem;
+    background-color: var(--color-brand);
+    border: 1px solid var(--color-brand);
+    border-radius: var(--radius-md);
+    color: var(--color-on-brand);
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s var(--ease-out);
+  }
+
+  .cart-summary__checkout:hover {
+    background-color: var(--color-brand-700);
+    border-color: var(--color-brand-700);
+  }
+
+  :root[data-theme='dark'] .cart-summary__item {
+    background-color: var(--color-surface-alt);
+  }
+
+  :root[data-theme='dark'] .cart-summary__item-name {
+    color: var(--color-ink);
+  }
+
+  :root[data-theme='dark'] .cart-summary__item-quantity {
+    color: var(--color-ink-700);
+  }
+</style>
+
+<script>
+  import { getCart, removeItem, clearCart, subscribe } from '@/lib/cart';
+
+  function renderCart() {
+    const cart = getCart();
+    const itemsContainer = document.querySelector('[data-cart-items]');
+    const totalElement = document.querySelector('[data-cart-total]');
+
+    if (!itemsContainer || !totalElement) return;
+
+    if (cart.items.length === 0) {
+      itemsContainer.innerHTML = '<p class="cart-summary__empty">Your cart is empty</p>';
+      totalElement.textContent = '$0.00';
+      return;
+    }
+
+    itemsContainer.innerHTML = cart.items
+      .map(
+        (item) => `
+      <div class="cart-summary__item">
+        <div class="cart-summary__item-info">
+          <div class="cart-summary__item-name">${item.name}</div>
+          <div class="cart-summary__item-quantity">Qty: ${item.quantity}</div>
+          <div class="cart-summary__item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+        </div>
+        <button type="button" class="cart-summary__item-remove" data-remove-item="${item.id}">
+          Remove
+        </button>
+      </div>
+    `
+      )
+      .join('');
+
+    const total = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    totalElement.textContent = `$${total.toFixed(2)}`;
+
+    // Attach remove handlers
+    itemsContainer.querySelectorAll('[data-remove-item]').forEach((button) => {
+      button.addEventListener('click', (e) => {
+        const id = (e.currentTarget as HTMLElement).dataset.removeItem!;
+        removeItem(id);
+      });
+    });
+  }
+
+  // Initial render
+  renderCart();
+
+  // Subscribe to changes
+  subscribe(renderCart);
+
+  // Clear cart handler
+  document.querySelector('[data-cart-clear]')?.addEventListener('click', () => {
+    if (confirm('Are you sure you want to clear your cart?')) {
+      clearCart();
+    }
+  });
+</script>

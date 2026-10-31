@@ -1,0 +1,73 @@
+---
+// src/pages/order-success.astro
+// Order success page — confirmation after checkout
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import SectionLayout from '@/components/ui/SectionLayout.astro';
+import Button from '@/components/ui/Button.astro';
+
+const title = 'Order Confirmed';
+const description = 'Thank you for your purchase!';
+---
+
+<BaseLayout title={title} description={description}>
+  <SectionLayout background="default" spacing="lg">
+    <Container size="sm">
+      <div class="success-page">
+        <div class="success-page__icon">✓</div>
+        <h1 class="success-page__title">Order Confirmed!</h1>
+        <p class="success-page__text">
+          Thank you for your purchase. Your order has been received and is being processed.
+        </p>
+        <p class="success-page__text">
+          A confirmation email will be sent to your email address shortly.
+        </p>
+        <div class="success-page__actions">
+          <Button variant="primary" href="/shop">
+            Continue Shopping
+          </Button>
+        </div>
+      </div>
+    </Container>
+  </SectionLayout>
+</BaseLayout>
+
+<style>
+  .success-page {
+    text-align: center;
+    padding: var(--spacing-12) 0;
+  }
+
+  .success-page__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 5rem;
+    background-color: var(--color-success);
+    color: #fff;
+    border-radius: var(--radius-pill);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-6);
+  }
+
+  .success-page__title {
+    font-size: var(--text-h1);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .success-page__text {
+    font-size: var(--text-body);
+    color: var(--color-ink-700);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-4);
+    max-width: 480px;
+    margin-inline: auto;
+  }
+
+  .success-page__actions {
+    margin-top: var(--spacing-8);
+  }
+</style>

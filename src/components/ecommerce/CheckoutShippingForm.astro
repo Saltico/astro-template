@@ -1,0 +1,190 @@
+---
+// src/components/ecommerce/CheckoutShippingForm.astro
+// Step 2: Shipping information form
+
+import Input from '@/components/ui/Input.astro';
+import Button from '@/components/ui/Button.astro';
+
+export interface Props {
+  initialData?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  };
+}
+
+const { initialData = {} } = Astro.props;
+---
+
+<form class="checkout-shipping" data-checkout-shipping>
+  <h2 class="checkout-shipping__title">Shipping Information</h2>
+
+  <div class="checkout-shipping__row">
+    <Input
+      name="firstName"
+      label="First Name"
+      type="text"
+      value={initialData.firstName}
+      placeholder="John"
+      required
+      autocomplete="given-name"
+    />
+    <Input
+      name="lastName"
+      label="Last Name"
+      type="text"
+      value={initialData.lastName}
+      placeholder="Doe"
+      required
+      autocomplete="family-name"
+    />
+  </div>
+
+  <div class="checkout-shipping__row">
+    <Input
+      name="email"
+      label="Email"
+      type="email"
+      value={initialData.email}
+      placeholder="john@example.com"
+      required
+      autocomplete="email"
+    />
+    <Input
+      name="phone"
+      label="Phone"
+      type="tel"
+      value={initialData.phone}
+      placeholder="+1 (555) 000-0000"
+      required
+      autocomplete="tel"
+    />
+  </div>
+
+  <Input
+    name="address"
+    label="Address"
+    type="text"
+    value={initialData.address}
+    placeholder="123 Main Street"
+    required
+    autocomplete="street-address"
+  />
+
+  <div class="checkout-shipping__row">
+    <Input
+      name="city"
+      label="City"
+      type="text"
+      value={initialData.city}
+      placeholder="New York"
+      required
+      autocomplete="address-level2"
+    />
+    <Input
+      name="state"
+      label="State"
+      type="text"
+      value={initialData.state}
+      placeholder="NY"
+      required
+      autocomplete="address-level1"
+    />
+  </div>
+
+  <div class="checkout-shipping__row">
+    <Input
+      name="zipCode"
+      label="ZIP Code"
+      type="text"
+      value={initialData.zipCode}
+      placeholder="10001"
+      required
+      autocomplete="postal-code"
+    />
+    <Input
+      name="country"
+      label="Country"
+      type="text"
+      value={initialData.country || 'United States'}
+      placeholder="United States"
+      required
+      autocomplete="country-name"
+    />
+  </div>
+
+  <div class="checkout-shipping__actions">
+    <Button type="button" variant="outline" data-checkout-prev>
+      Back
+    </Button>
+    <Button type="submit" variant="primary">
+      Continue to Payment
+    </Button>
+  </div>
+</form>
+
+<style>
+  .checkout-shipping {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+  }
+
+  .checkout-shipping__title {
+    font-size: var(--text-h3);
+    margin: 0;
+  }
+
+  .checkout-shipping__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+
+  @media (min-width: 640px) {
+    .checkout-shipping__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .checkout-shipping__actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--color-line);
+  }
+</style>
+
+<script>
+  import { saveShippingData, getShippingData } from '@/lib/checkout';
+
+  // Load saved data on mount
+  const savedData = getShippingData();
+  if (savedData) {
+    Object.entries(savedData).forEach(([key, value]) => {
+      const input = document.querySelector(`[name="${key}"]`) as HTMLInputElement;
+      if (input && !input.value) {
+        input.value = value;
+      }
+    });
+  }
+
+  // Save on submit
+  document.querySelector('[data-checkout-shipping]')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    saveShippingData(data as any);
+
+    // Dispatch custom event for wizard navigation
+    window.dispatchEvent(new CustomEvent('checkout-next'));
+  });
+</script>

@@ -1,0 +1,143 @@
+---
+// src/components/ecommerce/ProductCard.astro
+// Product card with image, title, price, and add-to-cart button
+
+import Button from '@/components/ui/Button.astro';
+
+export interface Props {
+  id: string;
+  name: string;
+  price: number;
+  image?: string;
+  description?: string;
+  currency?: string;
+}
+
+const { id, name, price, image, description, currency = 'USD' } = Astro.props;
+
+const formattedPrice = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency,
+}).format(price);
+---
+
+<article class="product-card">
+  {image && (
+    <div class="product-card__image">
+      <img src={image} alt={name} loading="lazy" />
+    </div>
+  )}
+
+  <div class="product-card__content">
+    <h3 class="product-card__title">{name}</h3>
+    {description && <p class="product-card__description">{description}</p>}
+    <div class="product-card__footer">
+      <span class="product-card__price">{formattedPrice}</span>
+      <Button variant="primary" size="sm" data-add-to-cart={id} data-name={name} data-price={price}>
+        Add to Cart
+      </Button>
+    </div>
+  </div>
+</article>
+
+<style>
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .product-card__image {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background-color: var(--color-surface-alt);
+  }
+
+  .product-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+    flex: 1;
+  }
+
+  .product-card__title {
+    font-size: var(--text-h4);
+    font-weight: 600;
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .product-card__description {
+    font-size: var(--text-small);
+    color: var(--color-ink-700);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .product-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-3);
+    margin-top: auto;
+    padding-top: var(--spacing-3);
+  }
+
+  .product-card__price {
+    font-size: var(--text-body);
+    font-weight: 700;
+    color: var(--color-brand);
+  }
+
+  :root[data-theme='dark'] .product-card {
+    background-color: var(--color-surface);
+    border-color: var(--color-line);
+  }
+
+  :root[data-theme='dark'] .product-card__title {
+    color: var(--color-ink);
+  }
+
+  :root[data-theme='dark'] .product-card__description {
+    color: var(--color-ink-700);
+  }
+</style>
+
+<script>
+  import { addItem } from '@/lib/cart';
+
+  // Attach add-to-cart handlers
+  document.querySelectorAll('[data-add-to-cart]').forEach((button) => {
+    button.addEventListener('click', (e) => {
+      const target = e.currentTarget as HTMLElement;
+      const id = target.dataset.addToCart!;
+      const name = target.dataset.name!;
+      const price = parseFloat(target.dataset.price!);
+
+      addItem({ id, name, price });
+
+      // Optional: visual feedback
+      const originalText = target.textContent;
+      target.textContent = 'Added!';
+      setTimeout(() => {
+        target.textContent = originalText;
+      }, 1500);
+    });
+  });
+</script>

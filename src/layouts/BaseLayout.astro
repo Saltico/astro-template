@@ -19,6 +19,7 @@ import JsonLd from '@/components/seo/JsonLd.astro';
 import GTM from '@/components/analytics/GTM.astro';
 import ConsentBanner from '@/components/analytics/ConsentBanner.astro';
 import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+import CartBadge from '@/components/ecommerce/CartBadge.astro';
 import { organizationSchema, websiteSchema, getSiteUrl } from '@/lib/seo';
 import { siteBrand, siteContact, topbarData, navigationData, footerData } from '@/data/site';
 import { initAnalytics } from '@/lib/analytics';
@@ -200,6 +201,7 @@ const allSchemas = [...baseSchemas, ...pageSchemas];
           </Navigation>
           <Fragment slot="cta">
             <ThemeToggle />
+            <CartBadge />
           </Fragment>
         </Header>
       )

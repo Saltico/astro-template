@@ -42,6 +42,7 @@ export const topbarData = {
 // ─── Navigation ──────────────────────────────────────────────────────
 export const navigationData: NavItem[] = [
   { label: 'Home', url: '/' },
+  { label: 'Shop', url: '/shop' },
   { label: 'Blog', url: '/blog' },
   {
     label: 'About',

@@ -1,0 +1,145 @@
+---
+// src/components/ecommerce/CheckoutWizard.astro
+// Multi-step checkout wizard container
+
+import type { ReactNode } from 'react';
+
+export interface Props {
+  steps: string[];
+  currentStep?: number;
+}
+
+const { steps, currentStep = 1 } = Astro.props;
+---
+
+<div class="checkout-wizard" data-checkout-wizard data-current-step={currentStep.toString()}>
+  <nav class="checkout-wizard__nav">
+    <ol class="checkout-wizard__steps">
+      {steps.map((step, index) => {
+        const stepNumber = index + 1;
+        const isActive = stepNumber === currentStep;
+        const isCompleted = stepNumber < currentStep;
+        return (
+          <li
+            class:list={[
+              'checkout-wizard__step',
+              isActive && 'checkout-wizard__step--active',
+              isCompleted && 'checkout-wizard__step--completed',
+            ]}
+          >
+            <span class="checkout-wizard__step-number">{stepNumber}</span>
+            <span class="checkout-wizard__step-label">{step}</span>
+          </li>
+        );
+      })}
+    </ol>
+  </nav>
+
+  <div class="checkout-wizard__content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .checkout-wizard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .checkout-wizard__nav {
+    border-bottom: 1px solid var(--color-line);
+    padding-bottom: var(--spacing-6);
+  }
+
+  .checkout-wizard__steps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .checkout-wizard__step {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    flex: 1;
+    position: relative;
+  }
+
+  .checkout-wizard__step::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-line);
+    transform: translateY(-50%);
+  }
+
+  .checkout-wizard__step:last-child::after {
+    display: none;
+  }
+
+  .checkout-wizard__step--completed::after {
+    background-color: var(--color-brand);
+  }
+
+  .checkout-wizard__step-number {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-surface-alt);
+    border: 2px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: var(--text-small);
+    color: var(--color-ink-500);
+    flex-shrink: 0;
+  }
+
+  .checkout-wizard__step--active .checkout-wizard__step-number,
+  .checkout-wizard__step--completed .checkout-wizard__step-number {
+    background-color: var(--color-brand);
+    border-color: var(--color-brand);
+    color: var(--color-on-brand);
+  }
+
+  .checkout-wizard__step-label {
+    font-size: var(--text-small);
+    font-weight: 600;
+    color: var(--color-ink-500);
+  }
+
+  .checkout-wizard__step--active .checkout-wizard__step-label {
+    color: var(--color-ink);
+  }
+
+  .checkout-wizard__step--completed .checkout-wizard__step-label {
+    color: var(--color-brand);
+  }
+
+  .checkout-wizard__content {
+    min-height: 400px;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .checkout-wizard__step-label {
+      display: none;
+    }
+
+    .checkout-wizard__step::after {
+      left: 100%;
+      width: calc(100% - 32px);
+    }
+  }
+</style>

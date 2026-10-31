@@ -1,0 +1,92 @@
+---
+// src/components/ecommerce/CartBadge.astro
+// Header cart badge showing item count
+
+import { getItem } from '@/lib/cart';
+
+export interface Props {
+  cartUrl?: string;
+}
+
+const { cartUrl = '/cart' } = Astro.props;
+---
+
+<a href={cartUrl} class="cart-badge" data-cart-badge>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="21" r="1"></circle>
+    <circle cx="20" cy="21" r="1"></circle>
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+  </svg>
+  <span class="cart-badge__count" data-cart-count>0</span>
+</a>
+
+<style>
+  .cart-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    color: var(--color-ink);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+  }
+
+  .cart-badge:hover {
+    background-color: var(--color-surface-alt);
+    border-color: var(--color-ink-500);
+  }
+
+  .cart-badge__count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background-color: var(--color-brand);
+    color: var(--color-on-brand);
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .cart-badge__count:empty,
+  .cart-badge__count[data-count="0"] {
+    display: none;
+  }
+
+  :root[data-theme='dark'] .cart-badge {
+    color: var(--color-ink);
+  }
+</style>
+
+<script>
+  import { getCart, subscribe } from '@/lib/cart';
+
+  function updateBadge() {
+    const cart = getCart();
+    const count = cart.items.reduce((sum, i) => sum + i.quantity, 0);
+    const badge = document.querySelector('[data-cart-count]');
+    if (badge) {
+      badge.textContent = count.toString();
+      badge.setAttribute('data-count', count.toString());
+    }
+  }
+
+  // Initial render
+  updateBadge();
+
+  // Subscribe to changes
+  subscribe(updateBadge);
+</script>
