@@ -1,25 +1,10 @@
 // src/content/config.ts
-// Content collections schema (zod)
-import { z, defineCollection } from 'astro:content';
+// Content collections schema — references dual-file pattern from cms/
+import { defineCollection } from 'astro:content';
+import { postAstro } from '../../cms/postsAstro';
+import { pageAstro } from '../../cms/pagesAstro';
 
-const posts = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    pubDate: z.coerce.date(),
-    draft: z.boolean().default(false),
-    ogImage: z.string().optional(),
-  }),
-});
-
-const pages = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    noindex: z.boolean().default(false),
-  }),
-});
+const posts = defineCollection(postAstro);
+const pages = defineCollection(pageAstro);
 
 export const collections = { posts, pages };

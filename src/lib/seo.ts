@@ -1,14 +1,14 @@
 // src/lib/seo.ts
-// Schema.org builders + getSiteUrl()
+// Schema.org builders + getSiteUrl() + localBusinessSchema
 
 import type { SiteConfig } from '@/types/seo';
 
 const DEFAULT_CONFIG: SiteConfig = {
   siteUrl: import.meta.env.PUBLIC_SITE_URL ?? 'https://example.com',
   siteName: 'Astro Template',
-  defaultLocale: 'en',
-  phone: '+1 (555) 000-0000',
-  email: 'contact@example.com',
+  defaultLocale: import.meta.env.PUBLIC_SITE_LANG ?? 'es',
+  phone: import.meta.env.PUBLIC_CONTACT_PHONE ?? '+1 (555) 000-0000',
+  email: import.meta.env.PUBLIC_CONTACT_EMAIL ?? 'contact@example.com',
   logoPath: '/logo.png',
 };
 
@@ -33,6 +33,7 @@ export function organizationSchema(): Record<string, unknown> {
       '@type': 'ContactPoint',
       telephone: config.phone,
       contactType: 'customer service',
+      email: config.email,
       availableLanguage: ['English', 'Spanish'],
     },
   };
@@ -54,6 +55,41 @@ export function websiteSchema(searchUrl?: string): Record<string, unknown> {
         },
         'query-input': 'required name=search_term_string',
       },
+    }),
+  };
+}
+
+export function localBusinessSchema(options?: {
+  name?: string;
+  address?: string;
+  openingHours?: string;
+  mapsEmbedUrl?: string;
+}): Record<string, unknown> {
+  const config = getSiteConfig();
+  const name = options?.name ?? config.siteName;
+  const address = options?.address ?? '123 Main Street, City';
+  const openingHours = options?.openingHours ?? 'Mo-Fr 09:00-18:00';
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name,
+    url: config.siteUrl,
+    logo: getSiteUrl(config.logoPath),
+    image: getSiteUrl('/og-default.jpg'),
+    telephone: config.phone,
+    email: config.email,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: address,
+    },
+    openingHours,
+    priceRange: '$$',
+    geo: {
+      '@type': 'GeoCoordinates',
+    },
+    ...(options?.mapsEmbedUrl && {
+      hasMap: options.mapsEmbedUrl,
     }),
   };
 }
