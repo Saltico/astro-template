@@ -1,8 +1,7 @@
 // src/data/site.ts
-// Single source of truth for all shared site data:
-// topbar, navigation, footer, branding, contact, social links.
-//
-// Components receive this data as props (not direct imports) for reusability.
+// Single source of truth for all shared site data.
+// Contact data reads from env vars (PUBLIC_CONTACT_*) with fallbacks.
+// In Fase 2 (Keystatic CMS), these values can be overridden by the site-settings collection.
 
 import type { NavItem } from '@/types/navigation';
 import type { FooterColumn, FooterLink, SocialLink } from '@/types/layout';
@@ -17,13 +16,16 @@ export const siteBrand = {
   siteUrl: import.meta.env.PUBLIC_SITE_URL ?? 'https://example.com',
 };
 
-// ─── Contact ─────────────────────────────────────────────────────────
+// ─── Language ────────────────────────────────────────────────────────
+export const siteLanguage = import.meta.env.PUBLIC_SITE_LANG ?? 'es';
+
+// ─── Contact (from env vars, with fallbacks) ─────────────────────────
 export const siteContact = {
-  phone: '+1 (555) 000-0000',
-  phoneHref: 'tel:+15550000000',
-  email: 'contact@example.com',
+  email: import.meta.env.PUBLIC_CONTACT_EMAIL ?? 'contact@example.com',
+  phone: import.meta.env.PUBLIC_CONTACT_PHONE ?? '+1 (555) 000-0000',
   address: '123 Main Street, City',
   schedule: 'Monday to Friday, 09:00 – 18:00',
+  mapsEmbedUrl: import.meta.env.PUBLIC_MAPS_EMBED_URL ?? '',
 };
 
 // ─── TopBar ──────────────────────────────────────────────────────────
@@ -43,14 +45,6 @@ export const topbarData = {
 export const navigationData: NavItem[] = [
   { label: 'Home', url: '/' },
   { label: 'Blog', url: '/blog' },
-  {
-    label: 'About',
-    url: '/about',
-    children: [
-      { label: 'Our Team', url: '/about#team' },
-      { label: 'Mission', url: '/about#mission' },
-    ],
-  },
   { label: 'Contact', url: '/contact' },
 ];
 
@@ -65,21 +59,12 @@ export const footerData: {
       links: [
         { label: 'Home', url: '/' },
         { label: 'Blog', url: '/blog' },
-        { label: 'About', url: '/about' },
         { label: 'Contact', url: '/contact' },
-      ],
-    },
-    {
-      title: 'Resources',
-      links: [
-        { label: 'Documentation', url: '/docs' },
-        { label: 'Changelog', url: '/changelog' },
       ],
     },
   ],
   legal: [
     { label: 'Privacy Policy', url: '/privacy' },
     { label: 'Legal Notice', url: '/legal' },
-    { label: 'Cookies', url: '/cookies' },
   ],
 };

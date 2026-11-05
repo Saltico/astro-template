@@ -1,6 +1,8 @@
 ---
 // src/pages/contact.astro
-// Contact page with a basic form
+// Contact page with a configurable form endpoint.
+// PUBLIC_FORM_ACTION env var points to an external service (Formspree, Getform, etc.)
+// Falls back to mailto: when no endpoint is configured.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/ui/Container.astro';
@@ -11,8 +13,13 @@ import Textarea from '@/components/ui/Textarea.astro';
 import Button from '@/components/ui/Button.astro';
 import { siteContact, siteBrand } from '@/data/site';
 
-const title = 'Contact';
-const description = `Get in touch with ${siteBrand.name}. We'd love to hear from you.`;
+const title = 'Contacto';
+const description = `Ponte en contacto con ${siteBrand.name}. Estaremos encantados de atenderte.`;
+
+const formAction = import.meta.env.PUBLIC_FORM_ACTION ?? '';
+const useMailto = !formAction && siteContact.email;
+const mailtoAction = useMailto ? `mailto:${siteContact.email}` : '';
+const isExternal = !!formAction;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -23,9 +30,9 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
       <div class="contact-grid">
         <!-- Contact info sidebar -->
         <aside class="contact-info">
-          <h2 class="contact-info__title">Get in Touch</h2>
+          <h2 class="contact-info__title">Ponte en contacto</h2>
           <p class="contact-info__text">
-            We'd love to hear from you. Fill out the form and we'll get back to you as soon as possible.
+            Estaremos encantados de atenderte. Rellena el formulario y te responderemos lo antes posible.
           </p>
 
           <div class="contact-info__details">
@@ -40,7 +47,7 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
 
             {siteContact.phone && (
               <div class="contact-info__item">
-                <span class="contact-info__label">Phone</span>
+                <span class="contact-info__label">Teléfono</span>
                 <a href={`tel:${siteContact.phone.replace(/\s/g, '')}`} class="contact-info__value">
                   {siteContact.phone}
                 </a>
@@ -49,36 +56,55 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
 
             {siteContact.address && (
               <div class="contact-info__item">
-                <span class="contact-info__label">Address</span>
+                <span class="contact-info__label">Dirección</span>
                 <span class="contact-info__value">{siteContact.address}</span>
               </div>
             )}
 
             {siteContact.schedule && (
               <div class="contact-info__item">
-                <span class="contact-info__label">Hours</span>
+                <span class="contact-info__label">Horario</span>
                 <span class="contact-info__value">{siteContact.schedule}</span>
+              </div>
+            )}
+
+            {siteContact.mapsEmbedUrl && (
+              <div class="contact-info__item">
+                <iframe
+                  src={siteContact.mapsEmbedUrl}
+                  width="100%"
+                  height="200"
+                  style="border:0; border-radius: var(--radius-md);"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="Ubicación"
+                />
               </div>
             )}
           </div>
         </aside>
 
         <!-- Contact form -->
-        <form class="contact-form" data-contact-form>
+        <form
+          class="contact-form"
+          data-contact-form
+          method={isExternal ? 'POST' : undefined}
+          action={isExternal ? formAction : mailtoAction || undefined}
+        >
           <div class="contact-form__row">
             <Input
               name="firstName"
-              label="First Name"
+              label="Nombre"
               type="text"
-              placeholder="John"
+              placeholder="Juan"
               required
               autocomplete="given-name"
             />
             <Input
               name="lastName"
-              label="Last Name"
+              label="Apellido"
               type="text"
-              placeholder="Doe"
+              placeholder="Pérez"
               required
               autocomplete="family-name"
             />
@@ -89,47 +115,47 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
               name="email"
               label="Email"
               type="email"
-              placeholder="john@example.com"
+              placeholder="juan@ejemplo.com"
               required
               autocomplete="email"
             />
             <Input
               name="phone"
-              label="Phone"
+              label="Teléfono"
               type="tel"
-              placeholder="+1 (555) 000-0000"
+              placeholder="+56 9 1234 5678"
               autocomplete="tel"
             />
           </div>
 
           <Input
             name="subject"
-            label="Subject"
+            label="Asunto"
             type="text"
-            placeholder="How can we help?"
+            placeholder="¿En qué podemos ayudarte?"
             required
           />
 
           <Textarea
             name="message"
-            label="Message"
-            placeholder="Tell us more about your inquiry..."
+            label="Mensaje"
+            placeholder="Cuéntanos más sobre tu consulta..."
             rows={6}
             required
           />
 
           <div class="contact-form__actions">
             <Button type="submit" variant="primary" size="lg">
-              Send Message
+              Enviar mensaje
             </Button>
           </div>
 
           <!-- Success message (hidden by default) -->
           <div class="contact-form__success" data-contact-success hidden>
             <div class="contact-form__success-icon">✓</div>
-            <h3 class="contact-form__success-title">Message Sent!</h3>
+            <h3 class="contact-form__success-title">¡Mensaje enviado!</h3>
             <p class="contact-form__success-text">
-              Thank you for reaching out. We'll get back to you within 24 hours.
+              Gracias por contactarnos. Te responderemos dentro de las próximas 24 horas.
             </p>
           </div>
         </form>
@@ -153,7 +179,6 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
     }
   }
 
-  /* ── Contact info sidebar ── */
   .contact-info__title {
     font-size: var(--text-h3);
     margin-bottom: var(--spacing-4);
@@ -201,7 +226,6 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
     text-decoration: underline;
   }
 
-  /* ── Contact form ── */
   .contact-form {
     display: flex;
     flex-direction: column;
@@ -225,7 +249,6 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
     justify-content: flex-end;
   }
 
-  /* ── Success message ── */
   .contact-form__success {
     text-align: center;
     padding: var(--spacing-8);
@@ -263,7 +286,6 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
     line-height: 1.6;
   }
 
-  /* ── Dark mode adjustments ── */
   :root[data-theme='dark'] .contact-info__text,
   :root[data-theme='dark'] .contact-info__value,
   :root[data-theme='dark'] .contact-form__success-text {
@@ -272,25 +294,21 @@ const description = `Get in touch with ${siteBrand.name}. We'd love to hear from
 </style>
 
 <script>
-  // Client-side form handler (placeholder — wire up to your backend or service like Formspree)
   (function () {
     const form = document.querySelector('[data-contact-form]');
     const success = document.querySelector('[data-contact-success]');
     if (!form || !success) return;
 
+    const hasExternalAction = form.hasAttribute('action') && form.getAttribute('method') === 'POST';
+
+    if (hasExternalAction) {
+      return;
+    }
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-
-      // TODO: Replace with actual submission logic
-      // Example: fetch('/api/contact', { method: 'POST', body: new FormData(form) })
-      //   .then(res => res.json())
-      //   .then(() => { ... })
-
-      // For now, show success message
       (form as HTMLFormElement).style.display = 'none';
       success.hidden = false;
-
-      // Optional: scroll to success message
       success.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   })();
