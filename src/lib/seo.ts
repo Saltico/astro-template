@@ -1,11 +1,11 @@
 // src/lib/seo.ts
-// Schema.org builders + getSiteUrl() + localBusinessSchema
+// Schema.org builders + getSiteUrl(). localBusinessSchema is OPT-IN (never injected by default).
 
 import type { SiteConfig } from '@/types/seo';
 
 const DEFAULT_CONFIG: SiteConfig = {
   siteUrl: import.meta.env.PUBLIC_SITE_URL ?? 'https://example.com',
-  siteName: 'Astro Template',
+  siteName: import.meta.env.PUBLIC_SITE_NAME ?? 'Site Name',
   defaultLocale: import.meta.env.PUBLIC_SITE_LANG ?? 'es',
   phone: import.meta.env.PUBLIC_CONTACT_PHONE ?? '+1 (555) 000-0000',
   email: import.meta.env.PUBLIC_CONTACT_EMAIL ?? 'contact@example.com',
@@ -91,38 +91,41 @@ export function websiteSchema(searchUrl?: string): Record<string, unknown> {
   };
 }
 
-export function localBusinessSchema(options?: {
-  name?: string;
-  address?: string;
-  openingHours?: string;
-  mapsEmbedUrl?: string;
-}): Record<string, unknown> {
+/**
+ * LocalBusiness JSON-LD. ONLY for businesses with a physical location / in-person service.
+ * (Events -> Organization + SportsEvent/Event; online-only -> Organization.)
+ * Opt-in: not injected by default. Built exclusively from REAL data passed by the project;
+ * there are no placeholder defaults. Returns null if the required real data is missing,
+ * so callers must skip it: `const ld = localBusinessSchema({...}); if (ld) schemas.push(ld)`.
+ */
+export function localBusinessSchema(options: {
+  name: string;
+  address: { streetAddress: string; addressLocality?: string; addressRegion?: string; postalCode?: string; addressCountry?: string };
+  telephone?: string;
+  email?: string;
+  /** schema.org opening hours, e.g. ['Mo-Fr 09:00-18:00'] (real data only) */
+  openingHours?: string[];
+  priceRange?: string;
+  geo?: { latitude: number; longitude: number };
+  image?: string;
+  mapsUrl?: string;
+}): Record<string, unknown> | null {
+  if (!options?.name || !options.address?.streetAddress) return null;
   const config = getSiteConfig();
-  const name = options?.name ?? config.siteName;
-  const address = options?.address ?? '123 Main Street, City';
-  const openingHours = options?.openingHours ?? 'Mo-Fr 09:00-18:00';
-
+  const { name, address, telephone, email, openingHours, priceRange, geo, image, mapsUrl } = options;
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name,
     url: config.siteUrl,
-    logo: getSiteUrl(config.logoPath),
-    image: getSiteUrl('/og-default.jpg'),
-    telephone: config.phone,
-    email: config.email,
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: address,
-    },
-    openingHours,
-    priceRange: '$$',
-    geo: {
-      '@type': 'GeoCoordinates',
-    },
-    ...(options?.mapsEmbedUrl && {
-      hasMap: options.mapsEmbedUrl,
-    }),
+    ...(image && { image }),
+    ...(telephone && { telephone }),
+    ...(email && { email }),
+    address: { '@type': 'PostalAddress', ...address },
+    ...(openingHours?.length && { openingHours }),
+    ...(priceRange && { priceRange }),
+    ...(geo && { geo: { '@type': 'GeoCoordinates', ...geo } }),
+    ...(mapsUrl && { hasMap: mapsUrl }),
   };
 }
 
@@ -154,7 +157,7 @@ export function articleSchema(
     description,
     url,
     datePublished,
-    image: image ?? getSiteUrl('/og-default.jpg'),
+    image: image ?? getSiteUrl('/img/og-default.jpg'),
     author: {
       '@type': 'Organization',
       name: config.siteName,
@@ -178,7 +181,7 @@ export function blogPostingSchema(
     description,
     url,
     datePublished,
-    image: image ?? getSiteUrl('/og-default.jpg'),
+    image: image ?? getSiteUrl('/img/og-default.jpg'),
     author: {
       '@type': 'Organization',
       name: config.siteName,

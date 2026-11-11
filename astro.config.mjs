@@ -18,6 +18,12 @@ export default defineConfig({
   site: SITE_URL,
   output: 'static',
   trailingSlash: 'never',
+  build: {
+    // Inline ALL CSS in the HTML: avoids render-blocking <link rel="stylesheet"> requests
+    // (PageSpeed). Trade-off: HTML grows by the CSS weight; measure it (gzip) after build
+    // and revisit to 'auto' if a project's CSS gets large.
+    inlineStylesheets: 'always',
+  },
   i18n: {
     defaultLocale: process.env.PUBLIC_SITE_LANG ?? 'es',
     locales: (process.env.PUBLIC_I18N_LOCALES ?? 'es').split(',').map(l => l.trim()).filter(Boolean),

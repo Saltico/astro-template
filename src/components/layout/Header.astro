@@ -6,6 +6,7 @@ export interface Props {
   variant?: 'default' | 'brand';
 }
 
+import { siteBrand } from '@/data/site';
 const { variant = 'default' } = Astro.props;
 const headerClassList = ['header', variant === 'brand' && 'header--brand'];
 ---
@@ -14,7 +15,7 @@ const headerClassList = ['header', variant === 'brand' && 'header--brand'];
   <div class="header__inner">
     <div class="header__logo">
       <slot name="logo">
-        <a href="/" class="header__brand">Astro Template</a>
+        <a href="/" class="header__brand">{siteBrand.name}</a>
       </slot>
     </div>
 

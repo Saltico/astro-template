@@ -26,13 +26,12 @@ Then visit:
 
 ```
 ├── public/              # Static assets
-│   ├── fonts/          # Self-hosted fonts
-│   └── og-default.jpg  # Default Open Graph image
+│   └── img/og-default.jpg  # Default Open Graph image (JPG 1200x630)
 ├── src/
-│   ├── assets/         # Images, icons, logos
+│   ├── assets/         # Images, icons, logos, fonts/ (self-hosted woff2 + OFL)
 │   ├── components/     # Reusable components
 │   │   ├── layout/     # Header, Footer, Navigation
-│   │   ├── seo/        # MetaTags, JsonLd, Breadcrumbs
+│   │   ├── seo/        # SEO, JsonLd, Breadcrumbs
 │   │   ├── analytics/  # GTM, ConsentBanner
 │   │   └── ui/         # Container, Button, Icon, etc.
 │   ├── content/        # Content collections (Keystatic)
@@ -73,6 +72,7 @@ cp .env.example .env
 
 Variables:
 - `PUBLIC_SITE_URL`: Canonical site URL (default: https://example.com)
+- `PUBLIC_SITE_NAME`: brand name (header, JSON-LD, logo alt). `PUBLIC_CONTACT_ADDRESS` / `PUBLIC_CONTACT_SCHEDULE`: optional real data (empty by default, not rendered if empty).
 - `PUBLIC_GTM_ID`: Google Tag Manager ID (optional). Takes priority over GA4.
 - `PUBLIC_GA4_ID`: Google Analytics 4 ID (optional). Direct gtag.js is injected ONLY when `PUBLIC_GTM_ID` is empty; if both are set, only GTM is loaded (configure GA4 inside the GTM container to avoid double counting).
 - `PUBLIC_I18N_LOCALES`: comma-separated locales (optional). With i18n enabled, `hreflang="x-default"` always points to the default-locale version of the page (e.g. `/en/about` -> `/about`).
@@ -116,6 +116,23 @@ Built-in SEO features:
 
 Configure in `src/lib/seo.ts` and `src/data/site.ts`.
 
+### Open Graph por defecto
+
+`public/img/og-default.jpg` (JPG 1200x630, <200 kB) es la og:image por defecto, con `og:image:width/height/type` (en `BaseLayout.astro`). Reemplázala por la imagen de marca del proyecto manteniendo formato JPG/PNG y 1200x630. Nunca uses AVIF/WebP como og:image (muchos scrapers no lo soportan).
+
+### LocalBusiness (opcional)
+
+`localBusinessSchema()` NO se inyecta por defecto y no tiene datos de relleno: devuelve `null` si faltan nombre y dirección reales. Úsalo solo para negocios con local físico o atención presencial (pásale datos reales y agrégalo a `jsonLd` de la página). Para eventos usa Organization + SportsEvent/Event; para negocios online, Organization.
+
+## Fuentes (autoalojadas)
+
+La plantilla incluye Archivo (titulares) e Inter (cuerpo) variables, subset latin, en `src/assets/fonts/` (licencia OFL en `OFL-*.txt`). Se declaran con `@font-face` + `font-display: swap` en `src/styles/base.css` y se precargan (máximo 2) en `BaseLayout.astro` con import `?url`. No hay Google Fonts ni CDN.
+
+Cambiar fuentes en un proyecto:
+1. Obtén el woff2 latin sin dejar dependencias: `npm pack @fontsource-variable/<fuente>` (o `@fontsource/<fuente>` para pesos estáticos), extrae el tgz y copia de `package/files/` solo `<fuente>-latin-wght-normal.woff2` (o los `-latin-400/700-normal.woff2` usados) y el `LICENSE` como `OFL-<fuente>.txt`. Alternativa: `npm i -D @fontsource...`, copiar los archivos y `npm uninstall`.
+2. Borra las fuentes anteriores, actualiza los `@font-face` (familia, peso, ruta; mantén el `unicode-range` latin) y los imports `?url` del preload en `BaseLayout.astro`.
+3. Ajusta `--font-heading` / `--font-body` en `tokens.css`. Incluye solo los pesos que use el CSS.
+
 ## Analytics
 
 Conditional loading: analytics scripts only load when IDs are provided in `.env`.
@@ -144,6 +161,8 @@ Tailwind CSS v4 with CSS-first configuration:
 - No magic numbers - all values come from tokens
 
 ## Deployment
+
+El CSS se inlinea en el HTML (`build.inlineStylesheets: 'always'`) para evitar CSS bloqueante; mide el peso del HTML tras el build.
 
 Build static files:
 ```bash

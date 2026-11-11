@@ -36,7 +36,7 @@ const {
 } = Astro.props;
 
 const finalRobots = noindex ? 'noindex, follow' : robots;
-const ogImageUrl = ogImage ?? new URL('/og-default.jpg', canonical).toString();
+const ogImageUrl = ogImage ?? new URL('/img/og-default.jpg', canonical).toString();
 // hreflang x-default ALWAYS points to the default-locale version (e.g. /en/x -> /x),
 // never to the current page's canonical when that page is a translation.
 const xDefault = getDefaultLocaleUrl(canonical, hreflang);

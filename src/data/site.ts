@@ -8,7 +8,8 @@ import type { FooterColumn, FooterLink, SocialLink } from '@/types/layout';
 
 // ─── Branding ────────────────────────────────────────────────────────
 export const siteBrand = {
-  name: 'Astro Template',
+  // Brand name: set PUBLIC_SITE_NAME per project (no hardcoded template name)
+  name: import.meta.env.PUBLIC_SITE_NAME ?? 'Site Name',
   tagline: 'A reusable, SEO-optimized static site template.',
   description:
     'A reusable static website template built with Astro, Tailwind CSS v4, and Keystatic CMS.',
@@ -23,8 +24,9 @@ export const siteLanguage = import.meta.env.PUBLIC_SITE_LANG ?? 'es';
 export const siteContact = {
   email: import.meta.env.PUBLIC_CONTACT_EMAIL ?? 'contact@example.com',
   phone: import.meta.env.PUBLIC_CONTACT_PHONE ?? '+1 (555) 000-0000',
-  address: '123 Main Street, City',
-  schedule: 'Monday to Friday, 09:00 – 18:00',
+  // Real data only: empty by default (Footer/Contact render them only when set)
+  address: import.meta.env.PUBLIC_CONTACT_ADDRESS ?? '',
+  schedule: import.meta.env.PUBLIC_CONTACT_SCHEDULE ?? '',
   mapsEmbedUrl: import.meta.env.PUBLIC_MAPS_EMBED_URL ?? '',
 };
 

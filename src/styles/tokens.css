@@ -37,7 +37,7 @@
   --color-warning: #d97706;
   --color-success: #16a34a;
 
-  /* Typography: self-hosted variable fonts in public/fonts/ */
+  /* Typography: self-hosted variable fonts in src/assets/fonts/ (@font-face en base.css) */
   --font-heading: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
