@@ -1,6 +1,7 @@
 ---
 // src/components/seo/MetaTags.astro
 import type { MetaTagsProps } from '@/types/seo';
+import { getDefaultLocaleUrl } from '@/lib/seo';
 
 export interface OgVideo {
   url: string;
@@ -65,4 +66,4 @@ const ogImageUrl = ogImage ?? new URL('/og-default.jpg', canonical).toString();
     ))
 }
 
-<link rel="alternate" hreflang="x-default" href={canonical} />
+<link rel="alternate" hreflang="x-default" href={xDefault} />

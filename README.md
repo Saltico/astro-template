@@ -73,8 +73,9 @@ cp .env.example .env
 
 Variables:
 - `PUBLIC_SITE_URL`: Canonical site URL (default: https://example.com)
-- `PUBLIC_GTM_ID`: Google Tag Manager ID (optional)
-- `PUBLIC_GA_ID`: Google Analytics 4 ID (optional)
+- `PUBLIC_GTM_ID`: Google Tag Manager ID (optional). Takes priority over GA4.
+- `PUBLIC_GA4_ID`: Google Analytics 4 ID (optional). Direct gtag.js is injected ONLY when `PUBLIC_GTM_ID` is empty; if both are set, only GTM is loaded (configure GA4 inside the GTM container to avoid double counting).
+- `PUBLIC_I18N_LOCALES`: comma-separated locales (optional). With i18n enabled, `hreflang="x-default"` always points to the default-locale version of the page (e.g. `/en/about` -> `/about`).
 - `WP_API_URL`: WordPress API URL (optional, for headless integration)
 
 ## Development

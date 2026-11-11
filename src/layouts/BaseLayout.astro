@@ -87,6 +87,10 @@ const htmlLang = pageLang ?? siteLanguage;
 // Analytics IDs from env vars
 const gtmId = import.meta.env.PUBLIC_GTM_ID;
 const ga4Id = import.meta.env.PUBLIC_GA4_ID;
+// GTM takes priority: if PUBLIC_GTM_ID is set, direct GA4 (gtag.js) is NOT injected
+// even when PUBLIC_GA4_ID is also set (configure GA4 inside the GTM container to
+// avoid double counting). Direct GA4 only when there is no GTM.
+const useDirectGa4 = Boolean(ga4Id) && !gtmId;
 
 // Footer derived from site.ts; override (if exists) wins.
 const effectiveFooter = {
@@ -139,8 +143,8 @@ const allSchemas = [...baseSchemas, ...pageSchemas];
     <!-- Google Tag Manager (conditional) -->
     {gtmId && <GTM gtmId={gtmId} />}
 
-    <!-- Google Analytics 4 (conditional) -->
-    {ga4Id && <GA4 ga4Id={ga4Id} />}
+    <!-- Google Analytics 4 direct (only when there is NO GTM; GTM has priority) -->
+    {useDirectGa4 && <GA4 ga4Id={ga4Id} />}
 
     <!-- SEO component (INMUTABLE — do not modify) -->
     <SEO

@@ -21,6 +21,38 @@ export function getSiteUrl(path = ''): string {
   return new URL(path, config.siteUrl).toString();
 }
 
+/**
+ * URL of the default-locale version of a page (used for hreflang="x-default").
+ * - If `hreflang` has an entry for the default locale, that URL wins.
+ * - If i18n is enabled (more than one locale in PUBLIC_I18N_LOCALES) and the
+ *   canonical path starts with a non-default locale prefix (/en/x), the prefix
+ *   is stripped (default locale has no prefix: prefixDefaultLocale = false).
+ * - Otherwise (i18n disabled, or already the default version) returns canonical.
+ */
+export function getDefaultLocaleUrl(canonical: string, hreflang?: Record<string, string>): string {
+  const defaultLocale = getSiteConfig().defaultLocale;
+  if (hreflang?.[defaultLocale]) return hreflang[defaultLocale];
+
+  const locales = (import.meta.env.PUBLIC_I18N_LOCALES ?? '')
+    .split(',')
+    .map((l: string) => l.trim())
+    .filter(Boolean);
+  if (locales.length < 2) return canonical;
+
+  const url = new URL(canonical);
+  const base = (import.meta.env.BASE_URL ?? '/').replace(/\/+$/, '');
+  let path = url.pathname;
+  if (base && (path === base || path.startsWith(base + '/'))) path = path.slice(base.length);
+
+  const [, first, ...rest] = path.split('/');
+  if (first && first !== defaultLocale && locales.includes(first)) {
+    url.pathname = base + '/' + rest.join('/');
+    if (url.pathname.length > 1) url.pathname = url.pathname.replace(/\/+$/, '');
+    return url.toString();
+  }
+  return canonical;
+}
+
 export function organizationSchema(): Record<string, unknown> {
   const config = getSiteConfig();
   return {
