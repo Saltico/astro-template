@@ -25,15 +25,15 @@ Then visit:
 ## Project Structure
 
 ```
-├── public/              # Static assets
+├── public/              # Solo lo que no se optimiza: favicon, logo (JSON-LD), robots.txt
 │   └── img/og-default.jpg  # Default Open Graph image (JPG 1200x630)
 ├── src/
-│   ├── assets/         # Images, icons, logos, fonts/ (self-hosted woff2 + OFL)
+│   ├── assets/         # img/ (imágenes optimizadas por astro:assets), icons, fonts/ (self-hosted woff2 + OFL)
 │   ├── components/     # Reusable components
 │   │   ├── layout/     # Header, Footer, Navigation
 │   │   ├── seo/        # SEO, JsonLd, Breadcrumbs
 │   │   ├── analytics/  # GTM, ConsentBanner
-│   │   └── ui/         # Container, Button, Icon, etc.
+│   │   └── ui/         # Container, Button, Icon, Img (imagen responsive), etc.
 │   ├── content/        # Content collections (Keystatic)
 │   │   ├── config.ts   # Collection schemas
 │   │   ├── posts/      # Blog posts
@@ -43,6 +43,7 @@ Then visit:
 │   ├── layouts/        # BaseLayout, PostLayout
 │   ├── lib/            # Utilities
 │   │   ├── seo.ts      # Schema.org builders
+│   │   ├── images.ts   # Resuelve '/img/x.avif' → src/assets/img (usado por Img.astro)
 │   │   ├── analytics.ts # GTM helpers
 │   │   └── wordpress-api.ts # Optional WP integration
 │   ├── pages/          # Routes
@@ -160,14 +161,50 @@ Tailwind CSS v4 with CSS-first configuration:
 - Dark mode support via `[data-theme="dark"]`
 - No magic numbers - all values come from tokens
 
-## Deployment
+## Imágenes
 
-El CSS se inlinea en el HTML (`build.inlineStylesheets: 'always'`) para evitar CSS bloqueante; mide el peso del HTML tras el build.
+- **Dónde**: todas las imágenes de contenido y diseño van en `src/assets/img/` (JPG, PNG, WebP o AVIF, **máx. 2560 px de ancho**; ~5 MB como tope razonable). En `public/` solo quedan `favicon.svg`, `logo.png` (lo referencia el JSON-LD) y `img/og-default.jpg` (Open Graph, JPG 1200x630).
+- **Componente**: `src/components/ui/Img.astro` renderiza `<picture>` con avif + webp, `srcset` (480/768/1024/1440/1920, descartando anchos mayores al original), `sizes`, `width`/`height` y `decoding="async"`. Acepta `ImageMetadata` (import o campo de colección) o una ruta `'/img/x.avif'` que se resuelve contra `src/assets/img`.
+
+  ```astro
+  ---
+  import Img from '@/components/ui/Img.astro';
+  import hero from '@/assets/img/hero.jpg';
+  ---
+  <Img src={hero} alt="..." sizes="100vw" priority />          <!-- imagen LCP -->
+  <Img src="/img/equipo.avif" alt="..." sizes="(min-width: 768px) 50vw, 100vw" />
+  ```
+
+- **`sizes`**: indica el ancho real que ocupa la imagen según el layout (p. ej. `(min-width: 1024px) 33vw, 100vw`); con el default `100vw` el navegador puede descargar variantes más grandes de lo necesario.
+- **Carga**: `priority` (eager + `fetchpriority="high"`) SOLO en la imagen LCP de cada página (`HeroSection` ya lo aplica a su `backgroundImage`). El resto es lazy.
+- **Fondos**: usa `<Img class="...">` posicionado de forma absoluta con `object-fit: cover`. No uses `background: url()` para imágenes grandes ni `background-attachment: fixed` (no se optimizan y fuerzan repintados).
+- **Colecciones Keystatic con imágenes**: usa `fields.image({ directory: 'src/assets/img', publicPath: '../../../assets/img/' })` (el `publicPath` es relativo desde el JSON/MDX de la colección hasta `src/assets/img`; ajusta la profundidad) y en el schema de Astro `schema: ({ image }) => z.object({ cover: image() })`. Así `image()` entrega `ImageMetadata` listo para `<Img>`. Con Keystatic en storage cloud cada subida es un commit y requiere rebuild. El campo `ogImage` de posts sigue siendo texto: la imagen OG debe ser JPG en `public/`.
+- **Originales**: Astro 5 deja en `dist/_astro` el original de cada imagen importada; una integración en `astro.config.mjs` (`prune-unreferenced-originals`) borra los no referenciados tras el build.
+
+## Rendimiento y caché de build
+
+- CSS: `build.inlineStylesheets: 'auto'` (con `vite.build.assetsInlineLimit: 8192`, que inlinea el CSS propio pequeño de cada página) deja **una sola hoja externa por página** con hash en `/_astro/`, cacheable e inmutable (sirve con `Cache-Control: immutable`), en vez de repetir el CSS en cada HTML. Las fuentes son autoalojadas.
+- `prefetch: { prefetchAll: true, defaultStrategy: 'hover' }`: precarga el HTML destino al pasar el cursor por un enlace.
+- La optimización de imágenes es lo más lento del build. Astro cachea las variantes en `node_modules/.astro`; en CI conserva esa carpeta. Ejemplo para GitHub Actions (antes de `npm run build`):
+
+  ```yaml
+  - name: Cache Astro image optimizations
+    uses: actions/cache@v4
+    with:
+      path: node_modules/.astro
+      key: astro-assets-${{ runner.os }}-${{ hashFiles('src/assets/**', 'package-lock.json') }}
+      restore-keys: |
+        astro-assets-${{ runner.os }}-
+  ```
+
+## Deployment
 
 Build static files:
 ```bash
 npm run build
 ```
+
+**`build.format`**: la plantilla usa el default de Astro (`'directory'`, `ruta/index.html`) con `trailingSlash: 'never'`, que sirve `/ruta` con 200 también con el adapter `@astrojs/node` (Hostinger). Con `'file'` (`ruta.html`) el handler estático de `@astrojs/node` NO resuelve las rutas: si necesitas `'file'` en hosting estático (p. ej. para evitar el 301 `/ruta` → `/ruta/` de GitHub Pages), aplícalo solo en el target estático (`format: isNode ? 'directory' : 'file'`) y copia `<locale>.html` → `<locale>/index.html` en un hook `astro:build:done`.
 
 Deploy `dist/` folder to:
 - Netlify

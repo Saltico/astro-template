@@ -1,0 +1,109 @@
+---
+// src/components/ui/Img.astro
+// Imagen responsive. `src` es ImageMetadata (import de src/assets/img o campo
+// `image()` del schema de una colección) o una ruta '/img/x.avif' resuelta contra
+// src/assets/img. Renderiza <picture> (avif + webp, srcset, sizes). Si la ruta no
+// está en src/assets/img (URL externa, public/) cae a un <img> plano.
+//
+// Se usa getImage() en vez de <Picture> para que el <img src> (fallback sin
+// srcset) sea una variante mediana y NO una copia a resolución original.
+//
+// Regla de carga: `priority` (eager + fetchpriority=high) SOLO para la imagen
+// LCP de la página; el resto lazy + decoding async.
+
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { resolveImage } from '@/lib/images';
+
+export interface Props {
+  /** ImageMetadata o ruta '/img/x.avif' de una imagen en src/assets/img. */
+  src: ImageMetadata | string;
+  alt?: string;
+  /** Atributo sizes (según el layout). Default: 100vw. */
+  sizes?: string;
+  /** Anchos del srcset (se descartan los mayores que la imagen original). */
+  widths?: number[];
+  /** Imagen LCP: eager + fetchpriority=high. */
+  priority?: boolean;
+  quality?: number;
+  class?: string;
+  /** Solo para el fallback (<img> plano). */
+  width?: number;
+  height?: number;
+}
+
+const DEFAULT_WIDTHS = [480, 768, 1024, 1440, 1920];
+
+const {
+  src,
+  alt = '',
+  sizes = '100vw',
+  widths = DEFAULT_WIDTHS,
+  priority = false,
+  quality = 60,
+  class: className,
+  width,
+  height,
+  ...rest
+} = Astro.props;
+
+const resolved = typeof src === 'string' ? resolveImage(src) : src;
+// En build, ImageMetadata es un Proxy: leer width/height/src marca la imagen
+// como "referenciada" y Astro deja el ORIGINAL sin optimizar en dist. `clone`
+// devuelve una copia plana (no marca); getImage() ya usa ese mismo camino.
+const meta: ImageMetadata | undefined =
+  (resolved as (ImageMetadata & { clone?: ImageMetadata }) | undefined)?.clone ?? resolved;
+const loading = priority ? 'eager' : 'lazy';
+const fetchpriority = priority ? 'high' : undefined;
+
+let avifSet = '';
+let webp: Awaited<ReturnType<typeof getImage>> | undefined;
+if (meta) {
+  const usable = widths.filter((w) => w <= meta.width);
+  if (usable.length === 0) usable.push(meta.width);
+  const fallbackWidth = usable.find((w) => w >= 1024) ?? usable[usable.length - 1]!;
+  const [avif, webpImg] = await Promise.all([
+    getImage({ src: meta, widths: usable, width: fallbackWidth, format: 'avif', quality }),
+    getImage({ src: meta, widths: usable, width: fallbackWidth, format: 'webp', quality }),
+  ]);
+  avifSet = avif.srcSet.attribute;
+  webp = webpImg;
+}
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const plainSrc =
+  typeof src === 'string' ? (/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(src) ? src : base + src) : src.src;
+---
+
+{
+  meta && webp ? (
+    <picture>
+      <source type="image/avif" srcset={avifSet} sizes={sizes} />
+      <img
+        src={webp.src}
+        srcset={webp.srcSet.attribute}
+        sizes={sizes}
+        alt={alt}
+        width={meta.width}
+        height={meta.height}
+        class={className}
+        loading={loading}
+        decoding="async"
+        fetchpriority={fetchpriority}
+        {...rest}
+      />
+    </picture>
+  ) : (
+    <img
+      src={plainSrc}
+      alt={alt}
+      width={width}
+      height={height}
+      class={className}
+      loading={loading}
+      decoding="async"
+      fetchpriority={fetchpriority}
+      {...rest}
+    />
+  )
+}
