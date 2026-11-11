@@ -29,6 +29,9 @@ export interface FooterProps {
   logoUrl?: string;
   logoAlt?: string;
   siteUrl?: string;
+  /** Muestra el botón que reabre el banner de consentimiento (solo con analytics). */
+  showConsentPreferences?: boolean;
+  consentPreferencesLabel?: string;
 }
 
 export interface BaseLayoutProps {

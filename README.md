@@ -126,6 +126,15 @@ Includes:
 - Consent Mode v2 support
 - Event tracking for clicks, downloads, outbound links
 
+### Consentimiento (cookies)
+
+- No hay página de cookies: `ConsentBanner` explica brevemente qué se guarda (analítica) y para qué.
+- Solo se renderiza (banner, default de consentimiento y botón del footer) si hay `PUBLIC_GTM_ID` o `PUBLIC_GA4_ID`.
+- El `consent default` (`ad_storage`, `ad_user_data`, `ad_personalization`, `analytics_storage` = denied) vive SOLO en el `<head>` de `BaseLayout.astro`, antes de GTM/GA4.
+- El banner lee la preferencia (`localStorage['consent-preference']`) y hace `gtag('consent','update',…)`. Aceptar concede `analytics_storage`; las señales de ads siguen denied salvo `grantAds` (prop, `false` por defecto).
+- Reabrir: el footer incluye "Preferencias de cookies" (`<button data-consent-open>`); también `window.openConsentPreferences()` o cualquier elemento con `data-consent-open`.
+- Textos: props de `ConsentBanner` (`title`, `message`, `accept`, `decline`, `statusAccepted`, `statusDeclined`, `closeLabel`, `grantAds`) y `consentPreferencesLabel` del Footer. Defaults en español. La plantilla no tiene singleton Keystatic de textos comunes; se personalizan por props.
+
 ## Styling
 
 Tailwind CSS v4 with CSS-first configuration:

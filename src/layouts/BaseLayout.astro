@@ -90,6 +90,7 @@ const ga4Id = import.meta.env.PUBLIC_GA4_ID;
 // GTM takes priority: if PUBLIC_GTM_ID is set, direct GA4 (gtag.js) is NOT injected
 // even when PUBLIC_GA4_ID is also set (configure GA4 inside the GTM container to
 // avoid double counting). Direct GA4 only when there is no GTM.
+const hasAnalytics = Boolean(gtmId || ga4Id);
 const useDirectGa4 = Boolean(ga4Id) && !gtmId;
 
 // Footer derived from site.ts; override (if exists) wins.
@@ -129,16 +130,20 @@ const allSchemas = [...baseSchemas, ...pageSchemas];
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-    <!-- Consent Mode defaults (before analytics) -->
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('consent', 'default', {
-        ad_storage: 'denied',
-        analytics_storage: 'denied',
-        wait_for_update: 500,
-      });
-    </script>
+    <!-- Consent Mode v2 default (only when analytics is configured; before GTM/GA4). Single source of truth. -->
+    {hasAnalytics && (
+      <script is:inline>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'denied',
+          wait_for_update: 500,
+        });
+      </script>
+    )}
 
     <!-- Google Tag Manager (conditional) -->
     {gtmId && <GTM gtmId={gtmId} />}
@@ -193,7 +198,7 @@ const allSchemas = [...baseSchemas, ...pageSchemas];
   </head>
   <body class={bodyClasses}>
     <!-- Consent Banner -->
-    {(gtmId || ga4Id) && <ConsentBanner />}
+    {hasAnalytics && <ConsentBanner />}
 
     <SkipLink targetId="main-content" />
 
@@ -243,6 +248,7 @@ const allSchemas = [...baseSchemas, ...pageSchemas];
           logoUrl={effectiveFooter.logoUrl}
           logoAlt={effectiveFooter.logoAlt}
           siteUrl={effectiveFooter.siteUrl}
+          showConsentPreferences={hasAnalytics}
         />
       )
     }

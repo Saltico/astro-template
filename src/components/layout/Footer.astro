@@ -17,6 +17,8 @@ const {
   logoUrl,
   logoAlt = brand,
   siteUrl,
+  showConsentPreferences = false,
+  consentPreferencesLabel = 'Preferencias de cookies',
 } = Astro.props;
 
 const year = new Date().getFullYear();
@@ -77,6 +79,13 @@ const year = new Date().getFullYear();
             <a href={link.url} class="footer__link footer__link--small">{link.label}</a>
           </li>
         ))}
+        {showConsentPreferences && (
+          <li>
+            <button type="button" class="footer__link footer__link--small footer__consent" data-consent-open>
+              {consentPreferencesLabel}
+            </button>
+          </li>
+        )}
       </ul>
     </div>
   </div>
@@ -218,6 +227,15 @@ const year = new Date().getFullYear();
     padding: 0;
     display: flex;
     gap: var(--spacing-4);
+  }
+
+  .footer__consent {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: underline;
   }
 
   .footer__link--small {
