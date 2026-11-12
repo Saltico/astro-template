@@ -1,17 +1,5 @@
 // src/types/seo.ts
 
-export interface MetaTagsProps {
-  title: string;
-  description: string;
-  canonical: string;
-  robots?: string;
-  ogImage?: string;
-  ogType?: string;
-  twitterCard?: 'summary_large_image' | 'summary';
-  hreflang?: Record<string, string>;
-  noindex?: boolean;
-}
-
 export interface BreadcrumbItem {
   label: string;
   url?: string;

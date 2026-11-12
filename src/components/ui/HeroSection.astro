@@ -1,9 +1,14 @@
 ---
 // src/components/ui/HeroSection.astro
-// Full-width hero section with background image/video support
+// Full-width hero section with background image/video support.
+// La imagen de fondo es un <Img> absoluto con object-fit (NO background-image ni
+// background-attachment: fixed). Es la imagen LCP: eager + fetchpriority high.
+import Img from './Img.astro';
+import type { ImageMetadata } from 'astro';
 
 export interface Props {
-  backgroundImage?: string;
+  /** ImageMetadata (import de src/assets/img) o ruta '/img/x.avif'. */
+  backgroundImage?: ImageMetadata | string;
   backgroundVideo?: string;
   poster?: string;
   overlay?: boolean;
@@ -32,7 +37,7 @@ const {
       <source src={backgroundVideo} type="video/mp4" />
     </video>
   ) : backgroundImage ? (
-    <img src={backgroundImage} alt="" class="hero__media" loading="eager" decoding="async" />
+    <Img src={backgroundImage} alt="" class="hero__media" sizes="100vw" priority />
   ) : null}
 
   {overlay && <div class="hero__overlay" />}
@@ -52,7 +57,7 @@ const {
     overflow: hidden;
   }
 
-  .hero__media {
+  .hero :global(.hero__media) {
     position: absolute;
     inset: 0;
     width: 100%;
